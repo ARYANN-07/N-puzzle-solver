@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Interactive 8-Puzzle (Slider Puzzle) Solver — visualize BFS and A* algorithms step-by-step with smooth animations." />
+  <title>N-Puzzle Solver — Visualize BFS &amp; A* Search</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ───────────── Ambient background blobs ───────────── -->
+  <div class="bg-blob blob-1" aria-hidden="true"></div>
+  <div class="bg-blob blob-2" aria-hidden="true"></div>
+  <div class="bg-blob blob-3" aria-hidden="true"></div>
+
+  <!-- ───────────── Main wrapper ───────────── -->
+  <main id="app">
+
+    <!-- Header -->
+    <header class="hero">
+      <h1 class="hero__title">
+        <span class="hero__icon">🧩</span>
+        N-Puzzle Solver
+      </h1>
+      <p class="hero__subtitle">Visualize <strong>BFS</strong> &amp; <strong>A*</strong> search algorithms solving the classic 8-puzzle</p>
+    </header>
+
+    <!-- Content grid: puzzle on the left, controls/stats on the right -->
+    <div class="content">
+
+      <!-- ─── Puzzle panel ─── -->
+      <section class="panel panel--puzzle" aria-label="Puzzle board">
+        <div id="puzzle-grid" class="puzzle-grid" role="grid" aria-label="3 by 3 slider puzzle">
+          <!-- Tiles are injected by JS -->
+        </div>
+        <p class="hint" id="hint-text">Click a tile next to the blank to slide it</p>
+      </section>
+
+      <!-- ─── Controls panel ─── -->
+      <section class="panel panel--controls" aria-label="Controls">
+
+        <!-- Algorithm picker -->
+        <div class="control-group">
+          <label class="control-label" for="algo-select">Algorithm</label>
+          <div class="select-wrapper">
+            <select id="algo-select" class="select">
+              <option value="astar" selected>A* (Manhattan + Linear Conflict)</option>
+              <option value="bfs">Breadth-First Search (BFS)</option>
+            </select>
+            <span class="select-arrow" aria-hidden="true">▾</span>
+          </div>
+        </div>
+
+        <!-- Speed slider -->
+        <div class="control-group">
+          <label class="control-label" for="speed-slider">Animation Speed</label>
+          <div class="speed-row">
+            <span class="speed-label">Slow</span>
+            <input type="range" id="speed-slider" class="slider" min="100" max="1000" value="400" step="50" />
+            <span class="speed-label">Fast</span>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="btn-row">
+          <button id="btn-solve" class="btn btn--primary" type="button">
+            <span class="btn__icon">▶</span> Solve
+          </button>
+          <button id="btn-reset" class="btn btn--secondary" type="button">
+            <span class="btn__icon">↺</span> Reset
+          </button>
+          <button id="btn-shuffle" class="btn btn--ghost" type="button">
+            <span class="btn__icon">🔀</span> Shuffle
+          </button>
+        </div>
+
+        <!-- Stats card -->
+        <div class="stats-card" id="stats-card">
+          <h2 class="stats-card__title">Solution Stats</h2>
+          <div class="stats-grid">
+            <div class="stat">
+              <span class="stat__value" id="stat-moves">—</span>
+              <span class="stat__label">Moves</span>
+            </div>
+            <div class="stat">
+              <span class="stat__value" id="stat-nodes">—</span>
+              <span class="stat__label">Nodes Expanded</span>
+            </div>
+            <div class="stat">
+              <span class="stat__value" id="stat-time">—</span>
+              <span class="stat__label">Time (s)</span>
+            </div>
+            <div class="stat">
+              <span class="stat__value" id="stat-algo">—</span>
+              <span class="stat__label">Algorithm</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status / error messages -->
+        <div id="status-bar" class="status-bar" role="status" aria-live="polite"></div>
+
+      </section>
+    </div>
+
+    <!-- Move counter during animation -->
+    <div class="move-counter" id="move-counter" aria-hidden="true">
+      Step <span id="current-step">0</span> / <span id="total-steps">0</span>
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,667 @@
+/* ==========================================================================
+   style.css — N-Puzzle Solver Design System
+   ==========================================================================
+   Design tokens, layout, glassmorphism panels, tile animations, and
+   micro-interactions for a premium dark-mode UI.
+   ========================================================================== */
+
+/* ──────────────────────────────────────────────────────────────────────────
+   0.  DESIGN TOKENS (CSS Custom Properties)
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Colors ── */
+  --bg-deep:        #0a0a1a;
+  --bg-surface:     rgba(255, 255, 255, 0.04);
+  --bg-glass:       rgba(255, 255, 255, 0.06);
+  --border-glass:   rgba(255, 255, 255, 0.10);
+  --text-primary:   #f0f0f5;
+  --text-secondary: #9595b0;
+  --text-muted:     #5e5e7a;
+
+  /* Accent gradient */
+  --accent-from:    #6366f1;   /* indigo-500 */
+  --accent-to:      #a855f7;   /* purple-500 */
+  --accent-glow:    rgba(99, 102, 241, 0.35);
+
+  /* Tile palette */
+  --tile-bg:        linear-gradient(135deg, #1e1e3a 0%, #2a2a50 100%);
+  --tile-border:    rgba(255, 255, 255, 0.12);
+  --tile-text:      #e8e8f0;
+  --tile-shadow:    rgba(0, 0, 0, 0.5);
+  --tile-hover-glow: rgba(99, 102, 241, 0.25);
+
+  /* Success / Error */
+  --color-success:  #34d399;
+  --color-error:    #f87171;
+  --color-warning:  #fbbf24;
+
+  /* ── Typography ── */
+  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ── Spacing & sizing ── */
+  --grid-gap:       8px;
+  --tile-size:      110px;
+  --border-radius:  16px;
+  --panel-padding:  32px;
+
+  /* ── Transitions ── */
+  --ease-smooth:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce:    cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   1.  RESET & BASE
+   ────────────────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--bg-deep);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   2.  AMBIENT BACKGROUND BLOBS
+   ────────────────────────────────────────────────────────────────────────── */
+
+.bg-blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+  animation: blob-drift 18s ease-in-out infinite alternate;
+}
+
+.blob-1 {
+  width: 480px; height: 480px;
+  background: radial-gradient(circle, var(--accent-from), transparent 70%);
+  top: -10%; left: -8%;
+}
+.blob-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, var(--accent-to), transparent 70%);
+  bottom: -5%; right: -5%;
+  animation-delay: -6s;
+}
+.blob-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, #22d3ee, transparent 70%);
+  top: 40%; left: 55%;
+  animation-delay: -12s;
+  opacity: 0.2;
+}
+
+@keyframes blob-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40px, -30px) scale(1.12); }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   3.  LAYOUT
+   ────────────────────────────────────────────────────────────────────────── */
+
+#app {
+  position: relative;
+  z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .content {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   4.  HERO / HEADER
+   ────────────────────────────────────────────────────────────────────────── */
+
+.hero {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.hero__title {
+  font-size: 2.6rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--accent-from), var(--accent-to), #22d3ee);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-pan 6s ease-in-out infinite alternate;
+}
+
+.hero__icon {
+  font-size: 2.2rem;
+  -webkit-text-fill-color: initial;
+  margin-right: 4px;
+}
+
+.hero__subtitle {
+  margin-top: 10px;
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.hero__subtitle strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+@keyframes gradient-pan {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   5.  GLASSMORPHISM PANELS
+   ────────────────────────────────────────────────────────────────────────── */
+
+.panel {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--border-radius);
+  padding: var(--panel-padding);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.panel--puzzle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.panel--controls {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   6.  PUZZLE GRID & TILES
+   ────────────────────────────────────────────────────────────────────────── */
+
+.puzzle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, var(--tile-size));
+  grid-template-rows:    repeat(3, var(--tile-size));
+  gap: var(--grid-gap);
+  position: relative;
+}
+
+/* ── Individual tile ── */
+.tile {
+  /* Position */
+  position: absolute;
+  width: var(--tile-size);
+  height: var(--tile-size);
+
+  /* Visual */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tile-bg);
+  border: 1px solid var(--tile-border);
+  border-radius: 12px;
+  box-shadow:
+    0 4px 16px var(--tile-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+
+  /* Text */
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--tile-text);
+
+  /* Transitions — the key to smooth sliding */
+  transition: transform 0.3s var(--ease-smooth),
+              box-shadow 0.3s var(--ease-smooth),
+              opacity 0.2s var(--ease-smooth);
+
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+}
+
+.tile:hover:not(.tile--blank):not(.tile--locked) {
+  box-shadow:
+    0 6px 24px var(--tile-shadow),
+    0 0 20px var(--tile-hover-glow),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+  z-index: 2;
+}
+
+.tile:active:not(.tile--blank):not(.tile--locked) {
+  transform: var(--tile-translate) scale(0.96);
+}
+
+/* Blank tile — invisible */
+.tile--blank {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  cursor: default;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Locked tiles during animation playback */
+.tile--locked {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* "Solved" celebration glow */
+.tile--solved {
+  border-color: var(--color-success);
+  box-shadow:
+    0 4px 16px var(--tile-shadow),
+    0 0 16px rgba(52, 211, 153, 0.25);
+  animation: solved-pulse 1.2s ease-in-out 1;
+}
+
+@keyframes solved-pulse {
+  0%, 100% { box-shadow: 0 4px 16px var(--tile-shadow), 0 0 16px rgba(52, 211, 153, 0.25); }
+  50%      { box-shadow: 0 4px 16px var(--tile-shadow), 0 0 32px rgba(52, 211, 153, 0.45); }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   7.  HINT TEXT
+   ────────────────────────────────────────────────────────────────────────── */
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  transition: opacity 0.3s;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   8.  CONTROLS
+   ────────────────────────────────────────────────────────────────────────── */
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+/* ── Custom select ── */
+.select-wrapper {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--accent-from);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.select option {
+  background: #1a1a30;
+  color: var(--text-primary);
+}
+
+.select-arrow {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+/* ── Speed slider ── */
+.speed-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.speed-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.1);
+  outline: none;
+  transition: background 0.3s;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+  cursor: pointer;
+  border: 2px solid var(--bg-deep);
+  box-shadow: 0 0 8px var(--accent-glow);
+  transition: transform 0.15s var(--ease-bounce);
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+  cursor: pointer;
+  border: 2px solid var(--bg-deep);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   9.  BUTTONS
+   ────────────────────────────────────────────────────────────────────────── */
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-smooth);
+  white-space: nowrap;
+}
+
+.btn__icon {
+  font-size: 1rem;
+}
+
+/* Primary — gradient accent */
+.btn--primary {
+  background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+  color: #fff;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+.btn--primary:hover:not(:disabled) {
+  box-shadow: 0 6px 28px var(--accent-glow);
+  transform: translateY(-2px);
+}
+.btn--primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Secondary — outlined */
+.btn--secondary {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+  border: 1px solid var(--border-glass);
+}
+.btn--secondary:hover:not(:disabled) {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.2);
+}
+
+/* Ghost — minimal */
+.btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+.btn--ghost:hover:not(:disabled) {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+}
+
+/* Disabled state */
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   10. STATS CARD
+   ────────────────────────────────────────────────────────────────────────── */
+
+.stats-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  padding: 20px 24px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s var(--ease-smooth), transform 0.4s var(--ease-smooth);
+}
+
+.stats-card--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stats-card__title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat__value {
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.stat__label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   11.  STATUS BAR
+   ────────────────────────────────────────────────────────────────────────── */
+
+.status-bar {
+  min-height: 24px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: 10px;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.status-bar:empty {
+  padding: 0;
+  min-height: 0;
+}
+
+.status-bar--info {
+  background: rgba(99, 102, 241, 0.12);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.status-bar--success {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--color-success);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.status-bar--error {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--color-error);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+.status-bar--solving {
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--color-warning);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   12.  MOVE COUNTER (shown during animation)
+   ────────────────────────────────────────────────────────────────────────── */
+
+.move-counter {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 10px 24px;
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  opacity: 0;
+  transition: transform 0.4s var(--ease-bounce), opacity 0.4s;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.move-counter--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   13.  LOADING SPINNER (used on the Solve button)
+   ────────────────────────────────────────────────────────────────────────── */
+
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   14.  RESPONSIVE TWEAKS
+   ────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 520px) {
+  :root {
+    --tile-size: 85px;
+    --panel-padding: 20px;
+  }
+
+  .hero__title { font-size: 1.8rem; }
+  .hero__subtitle { font-size: 0.9rem; }
+  .tile { font-size: 1.5rem; }
+  .stat__value { font-size: 1.1rem; }
+  .btn { padding: 10px 16px; font-size: 0.82rem; }
+}
